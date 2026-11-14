@@ -1,12 +1,8 @@
-// Configuração do app Web do Firebase.
-// Firebase Console → ⚙️ Configurações do projeto → Seus apps → Web → copie os valores e cole aqui.
-// Esses valores não são senha: só identificam o projeto. Quem protege os dados são as regras (firestore.rules).
-// Enquanto apiKey começar com "COLE", o site roda em MODO DEMONSTRAÇÃO.
-export const firebaseConfig = {
-  apiKey: "COLE_SUA_API_KEY",
-  authDomain: "seu-projeto.firebaseapp.com",
-  projectId: "seu-projeto",
-  storageBucket: "seu-projeto.firebasestorage.app",
-  messagingSenderId: "000000000000",
-  appId: "1:000000000000:web:0000000000000000",
+const firebaseConfig = {
+  apiKey: "AIzaSyA7vfaMNrbAWPrV0wQwh_83VHYELCiZl1g",
+  authDomain: "amigo-secreto-sorteador.firebaseapp.com",
+  projectId: "amigo-secreto-sorteador",
+  storageBucket: "amigo-secreto-sorteador.firebasestorage.app",
+  messagingSenderId: "747785496093",
+  appId: "1:747785496093:web:301f67b4b22406b61f48f4"
 };
