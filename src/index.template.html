@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Amigo Secreto de Natal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@700&family=Berkshire+Swash&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+{{CSS}}
+/* ---- extras do sistema de grupos ---- */
+.demo{background:#fff1c9;color:#7a5a10;border:2px dashed var(--gold);border-radius:14px;padding:10px 12px;font-size:13px;font-weight:700;margin-bottom:14px}
+.gbtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:#fff;color:#333;border:2px solid #eadfcd;border-radius:14px;padding:13px;font:800 15px Nunito;cursor:pointer}
+.gbtn svg{width:20px;height:20px}
+.userbar{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#d9eadf;font-size:13px;margin:-6px 0 14px}
+.userbar button{background:transparent;border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:99px;padding:4px 10px;font:700 12px Nunito;cursor:pointer}
+.glist{display:flex;flex-direction:column;gap:8px}
+.gtile{display:flex;align-items:center;gap:10px;border:2px solid #eadfcd;background:#fff;border-radius:16px;padding:12px;cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%}
+.gtile .gi{font-size:28px}
+.gtile b{display:block;font-size:16px}
+.gtile small{color:var(--muted)}
+.pill{margin-left:auto;font-size:11px;font-weight:800;border-radius:99px;padding:3px 9px;white-space:nowrap}
+.pill.open{background:#e2f4e8;color:var(--green)}
+.pill.done{background:#ffe3e3;color:var(--red-d)}
+.linkbox{display:flex;gap:6px;align-items:stretch;margin-top:6px}
+.linkbox input{font-size:13px!important;font-family:ui-monospace,Menlo,monospace!important}
+.gname{font-family:"Mountains of Christmas",cursive;font-size:40px;line-height:1;color:var(--red-d);margin:0}
+.gmeta{color:var(--muted);font-size:14px;margin-top:4px}
+.plist2{list-style:none;padding:0;margin:10px 0 0;display:flex;flex-direction:column;gap:6px}
+.plist2 li{display:flex;align-items:center;gap:8px;background:var(--cream);border-radius:12px;padding:6px 8px;font-weight:800}
+.plist2 li .em{display:block;font-weight:600;font-size:12px;color:var(--muted);word-break:break-all}
+.plist2 li .st{font-size:11px;font-weight:800;margin-left:auto;white-space:nowrap}
+.plist2 li .nmw{flex:1;min-width:0}
+.joined{background:#e2f4e8;border:2px dashed var(--green);border-radius:16px;padding:14px;text-align:center;color:var(--green);font-weight:800}
+.bigcount{font-family:"Mountains of Christmas",cursive;font-size:56px;color:var(--red);line-height:1}
+.center{text-align:center}
+.spin{display:inline-block;animation:sp 1s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+.mailprev{text-align:left;max-height:50vh;overflow:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.mailprev div{background:var(--cream);border-radius:12px;padding:8px 10px;font-size:13px}
+.authtabs{display:flex;gap:6px;margin:4px 0 10px}
+.authtabs button{flex:1;border:2px solid #eadfcd;background:#fff;border-radius:12px;padding:9px;font:800 13px Nunito;cursor:pointer;color:var(--muted)}
+.authtabs button.on{border-color:var(--red);color:var(--red);background:#fff1f1}
+.or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px;margin:14px 0}
+.or::before,.or::after{content:"";flex:1;height:1px;background:#eadfcd}
+.linkbtn{background:none;border:0;color:var(--green);font:700 13px Nunito;cursor:pointer;padding:6px 0;text-decoration:underline}
+.mytile{display:flex;align-items:center;gap:10px;border:2px solid #eadfcd;background:#fff;border-radius:16px;padding:12px;cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%}
+.mytile b{display:block}.mytile small{color:var(--muted)}
+.giftbig{width:160px;display:block;margin:6px auto 4px;cursor:pointer;animation:hop 1.1s infinite}
+input[type=email],input[type=password]{width:100%;padding:12px 14px;border:2px solid #eadfcd;border-radius:14px;font:16px Nunito;background:#fff;color:var(--ink)}
+input[type=email]:focus,input[type=password]:focus{outline:none;border-color:var(--gold)}
+</style>
+</head>
+<body>
+{{HEADER}}
+
+  <div id="demoBanner" class="demo hidden">🧪 <b>Modo demonstração</b>: os dados ficam só neste navegador. Cada aba pode entrar com uma conta diferente para testar. Cole a configuração do Firebase em <code>firebase-config.js</code> para usar de verdade.</div>
+  <div id="userbar" class="userbar hidden"><span id="userName"></span><span><button onclick="App.goHome()" id="homeBtn">🏠 Início</button> <button onclick="App.signOut()">Sair</button></span></div>
+
+  <!-- ======== GRUPO: faixa ======== -->
+  <div class="card banner hidden" id="gBanner">
+    <svg class="tree" viewBox="0 0 80 100" aria-hidden="true"><path d="M40 4 L46 16 L58 16 L48 24 L52 36 L40 28 L28 36 L32 24 L22 16 L34 16Z" fill="#f2c14e"/><path d="M40 22 L64 54 H52 L72 80 H8 L28 54 H16Z" fill="#1b6b3a"/><rect x="34" y="80" width="12" height="14" fill="#6b3e1f"/><circle cx="32" cy="50" r="3.5" fill="#f2c14e"/><circle cx="48" cy="58" r="3.5" fill="#fff"/><circle cx="26" cy="72" r="3.5" fill="#3bc4ff"/><circle cx="54" cy="72" r="3.5" fill="#f2c14e"/></svg>
+    <p id="gKicker" style="margin:0;color:#ffe2e2;font-weight:800">Você foi convidado para o amigo secreto</p>
+    <h2 id="gTitle">…</h2>
+    <p id="gInfo"></p>
+  </div>
+
+  <!-- ======== LOGIN (usado na home e no convite) ======== -->
+  <div class="card hidden" id="authCard">
+    <h2 id="authTitle">Entrar</h2>
+    <p class="hint" id="authHint">Crie sua conta ou entre para participar. É por ela que você vai ver quem tirou.</p>
+    <button class="gbtn" onclick="App.signInGoogle()"><svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Entrar com Google</button>
+    <div class="or">ou com e-mail e senha</div>
+    <div class="authtabs"><button id="at-in" class="on" onclick="App.authMode('in')">Já tenho conta</button><button id="at-up" onclick="App.authMode('up')">Criar conta</button></div>
+    <form onsubmit="App.emailAuth(event)">
+      <label class="f" for="aEmail">E-mail</label><input type="email" id="aEmail" autocomplete="email" required>
+      <label class="f" for="aPass">Senha</label><input type="password" id="aPass" autocomplete="current-password" minlength="6" required placeholder="mínimo 6 caracteres">
+      <button class="btn red full" style="margin-top:14px" type="submit" id="aBtn">Entrar</button>
+    </form>
+    <button class="linkbtn" onclick="App.resetPass()">Esqueci minha senha</button>
+    <div class="msg" id="aMsg"></div>
+  </div>
+
+  <!-- ======== HOME ======== -->
+  <section id="vHome" class="hidden">
+    <div id="homeIn" class="hidden">
+      <div class="card">
+        <h2>Meus amigos secretos 🎁</h2>
+        <p class="hint">Grupos em que você está inscrito.</p>
+        <div class="glist" id="myJoined"></div>
+      </div>
+      <div class="card green">
+        <svg class="holly" viewBox="0 0 60 50" aria-hidden="true"><path d="M30 26 C18 10 4 18 2 8 C12 14 14 4 24 10 C22 18 30 18 30 26Z" fill="#1b6b3a"/><path d="M30 26 C42 10 56 18 58 8 C48 14 46 4 36 10 C38 18 30 18 30 26Z" fill="#2e8b57"/><circle cx="26" cy="28" r="5" fill="#c8102e"/><circle cx="34" cy="28" r="5" fill="#e0213f"/><circle cx="30" cy="34" r="5" fill="#c8102e"/></svg>
+        <h2>Cadastro de grupo</h2>
+        <p class="hint">Vai organizar? Crie o grupo e mande o link de convite para a turma.</p>
+        <form onsubmit="App.createGroup(event)">
+          <label class="f" for="gNome">Nome do grupo</label>
+          <input type="text" id="gNome" maxlength="40" placeholder="Ex.: SOZ" required>
+          <div class="row">
+            <div><label class="f" for="gData">Data da troca</label><input type="date" id="gData"></div>
+            <div><label class="f" for="gValor">Valor do presente</label><input type="text" id="gValor" maxlength="30" placeholder="Ex.: R$ 50"></div>
+          </div>
+          <button class="btn red full" style="margin-top:14px" type="submit" id="gCreateBtn">🎄 Criar grupo e gerar convite</button>
+        </form>
+        <div class="msg" id="gMsg"></div>
+      </div>
+      <div class="card">
+        <h2>Grupos que organizo</h2>
+        <div class="glist" id="myGroups"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======== GRUPO ======== -->
+  <section id="vGroup" class="hidden">
+    <div class="card" id="joinCard">
+      <h2>Entrar no sorteio</h2>
+      <p class="hint">Confirme como a turma te conhece. Depois do sorteio, seu amigo secreto aparece aqui, na sua conta.</p>
+      <form onsubmit="App.join(event)">
+        <label class="f" for="jNome">Seu nome</label>
+        <input type="text" id="jNome" maxlength="50" placeholder="Como a turma te chama" required autocomplete="name">
+        <button class="btn red full" style="margin-top:14px" type="submit" id="jBtn">🎁 Quero participar!</button>
+      </form>
+      <div class="msg" id="jMsg"></div>
+    </div>
+
+    <div class="card green hidden" id="joinedCard">
+      <div class="joined" id="joinedTxt"></div>
+      <button class="linkbtn" style="display:block;margin:8px auto 0" onclick="App.openOv('ovLeave')">Sair do sorteio</button>
+    </div>
+
+    <div class="card hidden" id="resultCard">
+      <div class="center">
+        <h2>Seu amigo secreto chegou! 🎅</h2>
+        <p class="hint" style="padding:0" id="resultHint">Toque no presente para abrir. Confira longe dos curiosos!</p>
+        <svg class="giftbig" viewBox="0 0 120 120" onclick="App.showMine()" role="button" aria-label="Ver meu amigo secreto"><rect x="16" y="50" width="88" height="62" rx="6" fill="#c8102e"/><rect x="53" y="50" width="14" height="62" fill="#f2c14e"/><rect x="10" y="36" width="100" height="18" rx="5" fill="#e0213f"/><rect x="53" y="36" width="14" height="18" fill="#f2c14e"/><path d="M60 36c-6-16-28-24-32-11-3 10 16 13 32 11zM60 36c6-16 28-24 32-11 3 10-16 13-32 11z" fill="#f2c14e"/></svg>
+        <button class="btn red full" onclick="App.showMine()">🎁 Ver meu amigo secreto</button>
+      </div>
+    </div>
+
+    <div class="card hidden" id="drawnCard">
+      <div class="center">
+        <div style="font-size:54px">🔒</div>
+        <h2>O sorteio já foi feito!</h2>
+        <p class="hint" style="padding:0">As inscrições deste grupo fecharam.</p>
+      </div>
+    </div>
+
+    <div class="card" id="whoCard">
+      <h2>Quem já entrou</h2>
+      <div class="center"><span class="bigcount" id="pCount">0</span><br><span class="hint" style="padding:0">participantes</span></div>
+      <ul class="plist2" id="pPublic"></ul>
+    </div>
+
+    <div id="adminArea" class="hidden">
+      <div class="card green">
+        <h2>Painel do anfitrião 🎅</h2>
+        <p class="hint">Só você vê esta parte.</p>
+        <label class="f">Link de convite</label>
+        <div class="linkbox"><input type="text" id="inviteLink" readonly onclick="this.select()"><button class="btn sm" onclick="App.copyInvite(this)">Copiar</button></div>
+        <div class="acts"><a class="btn sm red" id="waInvite" target="_blank" rel="noopener">💬 Enviar convite no WhatsApp</a></div>
+        <p class="naughty">Você também participa? Inscreva-se no formulário acima, como todo mundo.</p>
+      </div>
+
+      <div class="card">
+        <h2>Inscritos</h2>
+        <p class="hint" id="adminHint">Remova quem entrou por engano antes de sortear.</p>
+        <ul class="plist2" id="pAdmin"></ul>
+      </div>
+
+      <div class="card" id="drawCard">
+        <div class="sackwrap">
+          <svg class="sack" id="sack" viewBox="0 0 160 160" aria-hidden="true"><path d="M40 60 C20 90 22 140 50 148 C80 156 110 154 128 140 C146 120 136 84 116 60Z" fill="#8b1a1a"/><path d="M40 60 C20 90 22 140 50 148 C60 150 70 151 80 151 C55 140 48 100 58 62Z" fill="#a52222"/><path d="M48 60 Q80 40 110 60 Q80 70 48 60Z" fill="#6e1212"/><rect x="56" y="48" width="48" height="12" rx="6" fill="#f2c14e"/><rect x="62" y="30" width="16" height="20" rx="2" fill="#1b6b3a"/><rect x="68" y="30" width="4" height="20" fill="#f2c14e"/><rect x="82" y="24" width="20" height="26" rx="2" fill="#2a6fdb"/><rect x="90" y="24" width="4" height="26" fill="#fff"/></svg>
+          <div class="elf" id="elf">O saco do Noel está esperando o seu OK!</div>
+        </div>
+        <button class="btn big red full" id="drawBtn" onclick="App.openOv('ovDraw')">✅ Dar OK e sortear</button>
+        <p class="naughty center">Depois do sorteio, cada um vê o seu amigo secreto entrando no site com a própria conta. As inscrições fecham.</p>
+        <div class="msg" id="drawMsg"></div>
+      </div>
+
+      <div class="card hidden" id="postDrawCard">
+        <h2>Sorteio feito! 🎉</h2>
+        <p class="hint" id="seenSummary"></p>
+        <button class="btn gold full" onclick="App.openOv('ovReveal')" id="revealBtn">🔔 Abrir o Dia da Revelação</button>
+      </div>
+    </div>
+
+    <div class="card hidden" id="dayCard"></div>
+  </section>
+
+  <section id="vLoading"><div class="card center"><span class="spin" style="font-size:40px">❄️</span><p class="hint" style="padding:0">Os duendes estão procurando…</p></div></section>
+
+  <p class="foot">Feito na oficina do Polo Norte 🦌</p>
+</div>
+
+<!-- modais -->
+<div class="ov" id="ovDraw"><div class="modal">
+  <h3>Dar o OK?</h3>
+  <p id="ovDrawTxt">O sorteio é feito agora e ninguém mais consegue se inscrever.</p>
+  <div class="stack">
+    <button class="btn red full" onclick="App.closeOv('ovDraw');App.draw()">🎅 Sim, sortear</button>
+    <button class="btn ghost full" onclick="App.closeOv('ovDraw')">Ainda não</button>
+  </div>
+</div></div>
+
+<div class="ov" id="ovRemove"><div class="modal">
+  <h3 id="rmTitle">Remover?</h3>
+  <p>A pessoa sai da lista e pode se inscrever de novo pelo link.</p>
+  <div class="stack">
+    <button class="btn red full" id="rmYes">Remover</button>
+    <button class="btn ghost full" onclick="App.closeOv('ovRemove')">Cancelar</button>
+  </div>
+</div></div>
+
+<div class="ov" id="ovLeave"><div class="modal">
+  <h3>Sair do sorteio?</h3>
+  <p>Você sai da lista. Dá para entrar de novo pelo link enquanto as inscrições estiverem abertas.</p>
+  <div class="stack">
+    <button class="btn red full" onclick="App.closeOv('ovLeave');App.leave()">Sair</button>
+    <button class="btn ghost full" onclick="App.closeOv('ovLeave')">Ficar</button>
+  </div>
+</div></div>
+
+<div class="ov" id="ovReveal"><div class="modal">
+  <h3>Dia da Revelação?</h3>
+  <p>Isto mostra na tela quem tirou quem, um de cada vez. Use só na festa, com todo mundo junto! Depois de aberto, não dá para esconder de novo.</p>
+  <div class="stack">
+    <button class="btn red full" onclick="App.closeOv('ovReveal');App.loadReveal()">🔔 Sim, estamos na festa</button>
+    <button class="btn ghost full" onclick="App.closeOv('ovReveal')">Cancelar</button>
+  </div>
+</div></div>
+
+<div class="ov" id="ovMine"><div class="modal">
+  <h3 id="rvHi">Olá!</h3>
+  <p id="rvTap">Toque no presente para abrir 🎀</p>
+  <svg class="gift" id="gift" viewBox="0 0 120 120" onclick="App.openGift()" role="button" aria-label="Abrir presente">
+    <rect x="16" y="50" width="88" height="62" rx="6" fill="#c8102e"/><rect x="53" y="50" width="14" height="62" fill="#f2c14e"/>
+    <circle cx="36" cy="72" r="4" fill="#fff" opacity=".6"/><circle cx="84" cy="92" r="4" fill="#fff" opacity=".6"/>
+    <g class="lid"><rect x="10" y="36" width="100" height="18" rx="5" fill="#e0213f"/><rect x="53" y="36" width="14" height="18" fill="#f2c14e"/>
+    <path d="M60 36c-6-16-28-24-32-11-3 10 16 13 32 11zM60 36c6-16 28-24 32-11 3 10-16 13-32 11z" fill="#f2c14e"/></g></svg>
+  <div id="rvOpen" class="hidden">
+    <p style="margin:0">Seu amigo secreto é...</p>
+    <div class="reveal" id="rvName"></div>
+    <div class="eventinfo" id="rvEvent"></div>
+  </div>
+  <button class="btn ghost full" onclick="App.closeMine()">Fechar</button>
+  <p class="naughty">🤫 Bico calado até o dia da troca!</p>
+</div></div>
+
+<script type="module">
+import { firebaseConfig } from './firebase-config.js';
+{{APP_JS}}
+</script>
+</body>
+</html>
