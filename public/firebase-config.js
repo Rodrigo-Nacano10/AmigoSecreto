@@ -1,10 +1,17 @@
-// Firebase Console → Configurações do projeto → Seus apps → Web → copie o objeto firebaseConfig e cole aqui.
-// Enquanto apiKey começar com "COLE", o site roda em MODO DEMONSTRAÇÃO (dados só no navegador).
-export const firebaseConfig = {
-  apiKey: "COLE_SUA_API_KEY",
-  authDomain: "seu-projeto.firebaseapp.com",
-  projectId: "seu-projeto",
-  storageBucket: "seu-projeto.appspot.com",
-  messagingSenderId: "000000000000",
-  appId: "1:000000000000:web:0000000000000000"
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyA7vfaMNrbAWPrV0wQwh_83VHYELCiZl1g",
+  authDomain: "amigo-secreto-sorteador.firebaseapp.com",
+  projectId: "amigo-secreto-sorteador",
+  storageBucket: "amigo-secreto-sorteador.firebasestorage.app",
+  messagingSenderId: "747785496093",
+  appId: "1:747785496093:web:301f67b4b22406b61f48f4"
 };
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
