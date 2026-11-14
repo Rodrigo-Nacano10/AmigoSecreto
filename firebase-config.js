@@ -1,4 +1,4 @@
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "AIzaSyA7vfaMNrbAWPrV0wQwh_83VHYELCiZl1g",
   authDomain: "amigo-secreto-sorteador.firebaseapp.com",
   projectId: "amigo-secreto-sorteador",
