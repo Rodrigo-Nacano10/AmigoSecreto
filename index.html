@@ -206,6 +206,10 @@ input[type=email]:focus,input[type=password]:focus{outline:none;border-color:var
 .crew-in::before,.crew-in::after{content:"";position:absolute;top:8px;width:18px;height:100%;background:#8f0b20;z-index:-1}
 .crew-in::before{left:-12px;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,40% 50%)}
 .crew-in::after{right:-12px;clip-path:polygon(0 0,100% 0,60% 50%,100% 100%,0 100%)}
+.music{position:fixed;right:12px;bottom:14px;z-index:55;display:flex;align-items:center;gap:6px;background:rgba(13,43,34,.92);border:2px solid var(--gold);border-radius:99px;padding:5px 5px 5px 14px;color:#fff;font:800 12px Nunito;box-shadow:0 6px 18px rgba(0,0,0,.4);max-width:calc(100vw - 24px)}
+.music span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+.music button{border:0;width:36px;height:36px;border-radius:50%;background:var(--red);color:#fff;font-size:16px;cursor:pointer;flex:none}
+.music button#musicNext{background:rgba(255,255,255,.15)}
 </style>
 </head>
 <body>
@@ -620,6 +624,64 @@ function confetti(n = 40){ const em = ['❄️','🎁','⭐','🎄','🔔','🍬
 $('bulbs').innerHTML = '<span class="bulb"></span>'.repeat(Math.max(10, Math.floor(innerWidth/34)));
 $('soundBtn').textContent = SOUND ? '🔔' : '🔕';
 
+
+/* ================================================================
+   MÚSICAS (caixinha de música sintetizada — melodias de domínio público)
+   ================================================================ */
+const NOTE = { C:-9, 'C#':-8, D:-7, 'D#':-6, E:-5, F:-4, 'F#':-3, G:-2, 'G#':-1, A:0, 'A#':1, B:2 };
+const freq = n => { const m = n.match(/^([A-G]#?)(\d)$/); return 440 * Math.pow(2, (NOTE[m[1]] + (m[2] - 4) * 12) / 12); };
+const seq = s => s.trim().split(/\s+/).map(t => { const [n, d] = t.split(':'); return [n, parseFloat(d)]; });
+const SONGS = [
+  { nome:'Jingle Bells', bpm:168, up:1, notas: seq(`
+    E4:1 E4:1 E4:2 E4:1 E4:1 E4:2 E4:1 G4:1 C4:1.5 D4:0.5 E4:4
+    F4:1 F4:1 F4:1.5 F4:0.5 F4:1 E4:1 E4:1 E4:0.5 E4:0.5 E4:1 D4:1 D4:1 E4:1 D4:2 G4:2
+    E4:1 E4:1 E4:2 E4:1 E4:1 E4:2 E4:1 G4:1 C4:1.5 D4:0.5 E4:4
+    F4:1 F4:1 F4:1.5 F4:0.5 F4:1 E4:1 E4:1 E4:0.5 E4:0.5 G4:1 G4:1 F4:1 D4:1 C4:4`) },
+  { nome:'We Wish You a Merry Christmas', bpm:150, up:0, notas: seq(`
+    G4:1 C5:1 C5:0.5 D5:0.5 C5:0.5 B4:0.5 A4:1 A4:1 A4:1 D5:1 D5:0.5 E5:0.5 D5:0.5 C5:0.5 B4:1 G4:1 G4:1
+    E5:1 E5:0.5 F5:0.5 E5:0.5 D5:0.5 C5:1 A4:1 G4:0.5 G4:0.5 A4:1 D5:1 B4:1 C5:3
+    G4:1 C5:1 C5:0.5 D5:0.5 C5:0.5 B4:0.5 A4:1 A4:1 A4:1 D5:1 D5:0.5 E5:0.5 D5:0.5 C5:0.5 B4:1 G4:1 G4:1
+    E5:1 E5:0.5 F5:0.5 E5:0.5 D5:0.5 C5:1 A4:1 G4:0.5 G4:0.5 A4:1 D5:1 B4:1 C5:3`) },
+  { nome:'Deck the Halls', bpm:132, up:1, notas: seq(`
+    G4:1.5 F4:0.5 E4:1 D4:1 C4:1 D4:1 E4:1 C4:1 D4:0.5 E4:0.5 F4:0.5 D4:0.5 E4:1.5 D4:0.5 C4:1 B3:1 C4:2
+    G4:1.5 F4:0.5 E4:1 D4:1 C4:1 D4:1 E4:1 C4:1 D4:0.5 E4:0.5 F4:0.5 D4:0.5 E4:1.5 D4:0.5 C4:1 B3:1 C4:2
+    G4:1.5 F4:0.5 E4:1 D4:1 C4:1 D4:1 E4:1 C4:1 A4:0.5 A4:0.5 A4:0.5 A4:0.5 G4:1.5 F4:0.5 E4:1 D4:1 C4:2`) },
+  { nome:'Noite Feliz', bpm:100, up:0, notas: seq(`
+    G4:1.5 A4:0.5 G4:1 E4:3 G4:1.5 A4:0.5 G4:1 E4:3 D5:2 D5:1 B4:3 C5:2 C5:1 G4:3
+    A4:2 A4:1 C5:1.5 B4:0.5 A4:1 G4:1.5 A4:0.5 G4:1 E4:3 A4:2 A4:1 C5:1.5 B4:0.5 A4:1 G4:1.5 A4:0.5 G4:1 E4:3
+    D5:2 D5:1 F5:1.5 D5:0.5 B4:1 C5:3 E5:3 C5:1 G4:1 E4:1 G4:1.5 F4:0.5 D4:1 C4:4`) },
+];
+const Music = { on:false, i:0, timer:null, master:null };
+function boxNote(a, out, f, t, dur){
+  [[1,.22],[2,.07],[4.2,.025]].forEach(([m,v]) => { const o = a.createOscillator(), g = a.createGain();
+    o.type = 'sine'; o.frequency.value = f*m; g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(v,t+.008);
+    g.gain.exponentialRampToValueAtTime(.0001, t + Math.max(.6, dur*1.6)); o.connect(g).connect(out); o.start(t); o.stop(t + Math.max(.6,dur*1.6) + .05); });
+}
+function playSong(){
+  const a = ac(); if (!a || !Music.on) return;
+  if (a.state === 'suspended') a.resume();
+  const s = SONGS[Music.i], beat = 60 / s.bpm, out = Music.master; let t = a.currentTime + .15;
+  s.notas.forEach(([n, d]) => { const m = n.match(/^([A-G]#?)(\d)$/); boxNote(a, out, freq(m[1] + (+m[2] + s.up)), t, d*beat); t += d*beat; });
+  updateMusicUI();
+  Music.timer = setTimeout(() => { Music.i = (Music.i + 1) % SONGS.length; playSong(); }, (t - a.currentTime + 1.6) * 1000);
+}
+function stopMusic(){ clearTimeout(Music.timer); if (Music.master){ try { Music.master.disconnect(); } catch {} Music.master = null; } }
+function startMusic(){ const a = ac(); if (!a) return; stopMusic(); Music.master = a.createGain(); Music.master.gain.value = .5; Music.master.connect(a.destination); playSong(); }
+function updateMusicUI(){
+  $('musicBtn').textContent = Music.on ? '⏸' : '🎵'; $('musicBtn').setAttribute('aria-label', Music.on ? 'Pausar músicas' : 'Tocar músicas');
+  $('musicName').textContent = Music.on ? '♪ ' + SONGS[Music.i].nome : 'Músicas de Natal';
+  $('musicNext').classList.toggle('hidden', !Music.on);
+}
+window.toggleMusic = () => { Music.on = !Music.on; try { localStorage.setItem('asMusic', Music.on ? '1' : '0'); } catch {} Music.on ? startMusic() : stopMusic(); updateMusicUI(); };
+window.nextMusic = () => { if (!Music.on) return; Music.i = (Music.i + 1) % SONGS.length; startMusic(); };
+(function initMusic(){
+  const box = document.createElement('div'); box.className = 'music';
+  box.innerHTML = `<span id="musicName">Músicas de Natal</span><button id="musicNext" class="hidden" onclick="window.nextMusic()" aria-label="Próxima música">⏭</button><button id="musicBtn" onclick="window.toggleMusic()" aria-label="Tocar músicas">🎵</button>`;
+  document.body.appendChild(box);
+  let want = false; try { want = localStorage.getItem('asMusic') === '1'; } catch {}
+  // navegadores só liberam som depois de um toque: retoma no primeiro toque se estava ligado
+  if (want){ const go = e => { if (e.target.closest && e.target.closest('.music')) return; removeEventListener('pointerdown', go, true); if (!Music.on){ Music.on = true; startMusic(); updateMusicUI(); } }; addEventListener('pointerdown', go, true); }
+})();
 
 /* ================================================================
    APP
