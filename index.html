@@ -224,15 +224,15 @@ input[type=email]:focus,input[type=password]:focus{outline:none;border-color:var
 }
 /* celular: rodapé de ponta a ponta, sem cobrir o conteúdo */
 @media (max-width:699px){
-  .yt{left:0;right:0;bottom:0;border-width:2px 0 0;border-radius:16px 16px 0 0;padding-bottom:env(safe-area-inset-bottom)}
-  .yt.open{display:flex;align-items:flex-end;gap:8px;padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
-  .yt.open .yt-bar{flex:1;flex-direction:column;align-items:stretch;padding:0;gap:8px}
-  .yt.open .yt-bar span{white-space:normal;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;font-size:13px}
-  .yt.open .yt-bar{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:1fr auto;align-self:stretch;padding-top:4px}
-  .yt.open .yt-bar span{grid-column:1/-1;align-self:start}
-  .yt.open .yt-bar button{width:100%;border-radius:12px;height:40px}
-  .wrap{padding-bottom:90px}
-  body.yt-open .wrap{padding-bottom:250px}
+  .yt{right:10px;bottom:calc(10px + env(safe-area-inset-bottom));border-radius:99px;max-width:calc(100vw - 20px)}
+  .yt:not(.open) .yt-bar{padding:4px 4px 4px 12px}
+  .yt:not(.open) .yt-bar span{max-width:130px;font-size:11px}
+  .yt.open{display:flex;align-items:stretch;gap:6px;padding:6px;border-radius:16px}
+  .yt.open .yt-bar{flex-direction:column;justify-content:space-between;padding:0;gap:6px}
+  .yt.open .yt-bar span{display:none}
+  .yt.open .yt-bar button{width:40px;height:40px;border-radius:12px}
+  .wrap{padding-bottom:70px}
+  body.yt-open .wrap{padding-bottom:230px}
 }
 </style>
 </head>
@@ -684,9 +684,29 @@ async function ytEnsure(){
     });
   });
 }
+const POSKEY = 'asMusicPos';
+function ytSavePos(){
+  try { if (!Music.player || !Music.ready || !Music.want) return;
+    localStorage.setItem(POSKEY, JSON.stringify({ i: Music.player.getPlaylistIndex() || 0, t: Math.floor(Music.player.getCurrentTime() || 0), at: Date.now() })); } catch {}
+}
+function ytStart(){
+  Music.want = true;
+  let pos = null; try { pos = JSON.parse(localStorage.getItem(POSKEY)); } catch {}
+  if (!Music.resumed && pos && Date.now() - pos.at < 30*60*1000 && (pos.i || pos.t > 3)){
+    Music.resumed = true;
+    try { Music.player.loadPlaylist(YT_VIDEOS, pos.i || 0, pos.t || 0); Music.player.setLoop(true); return; } catch {}
+  }
+  Music.resumed = true; Music.player.playVideo();
+}
+setInterval(() => { if (Music.playing) ytSavePos(); }, 4000);
+addEventListener('pagehide', ytSavePos);
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) ytSavePos();
+  else if (Music.want && Music.ready && !Music.playing) { try { Music.player.playVideo(); } catch {} }  // voltou para a aba: retoma
+});
 window.ytToggle = async () => {
   try { await ytEnsure(); } catch(e){ console.error(e); return; }
-  if (Music.playing){ Music.player.pauseVideo(); Music.want = false; } else { Music.player.playVideo(); Music.want = true; }
+  if (Music.playing){ Music.player.pauseVideo(); Music.want = false; } else ytStart();
   try { localStorage.setItem('asMusic', Music.want ? '1' : '0'); } catch {}
 };
 window.ytNext = () => { if (Music.player) Music.player.nextVideo(); };
@@ -700,7 +720,7 @@ window.ytMin = () => { if (Music.player) Music.player.pauseVideo(); Music.want =
       <button id="ytMin" onclick="window.ytMin()" aria-label="Minimizar e pausar">–</button></div>`;
   document.body.appendChild(box);
   // carrega o tocador logo de cara (sem tocar), para o primeiro toque responder na hora
-  ytEnsure().then(() => { if (Music.pending){ Music.pending = false; Music.player.playVideo(); } }).catch(() => {});
+  ytEnsure().then(() => { if (Music.pending){ Music.pending = false; ytStart(); } }).catch(() => {});
   // os navegadores só liberam som depois de uma interação: a música começa no 1º toque/clique/tecla
   // em qualquer lugar da página — a não ser que a pessoa tenha minimizado o tocador antes (fica lembrado)
   let off = false; try { off = localStorage.getItem('asMusic') === '0'; } catch {}
@@ -708,7 +728,7 @@ window.ytMin = () => { if (Music.player) Music.player.pauseVideo(); Music.want =
     const go = e => {
       if (e.target.closest && e.target.closest('#yt')) { stop(); return; } // clique no próprio tocador: ele mesmo resolve
       stop(); Music.want = true;
-      if (Music.ready) Music.player.playVideo(); else Music.pending = true;
+      if (Music.ready) ytStart(); else Music.pending = true;
     };
     const stop = () => ['pointerdown','keydown','touchstart'].forEach(t => removeEventListener(t, go, true));
     ['pointerdown','keydown','touchstart'].forEach(t => addEventListener(t, go, { capture:true, passive:true }));
