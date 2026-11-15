@@ -206,10 +206,34 @@ input[type=email]:focus,input[type=password]:focus{outline:none;border-color:var
 .crew-in::before,.crew-in::after{content:"";position:absolute;top:8px;width:18px;height:100%;background:#8f0b20;z-index:-1}
 .crew-in::before{left:-12px;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,40% 50%)}
 .crew-in::after{right:-12px;clip-path:polygon(0 0,100% 0,60% 50%,100% 100%,0 100%)}
-.music{position:fixed;right:12px;bottom:14px;z-index:55;display:flex;align-items:center;gap:6px;background:rgba(13,43,34,.92);border:2px solid var(--gold);border-radius:99px;padding:5px 5px 5px 14px;color:#fff;font:800 12px Nunito;box-shadow:0 6px 18px rgba(0,0,0,.4);max-width:calc(100vw - 24px)}
-.music span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
-.music button{border:0;width:36px;height:36px;border-radius:50%;background:var(--red);color:#fff;font-size:16px;cursor:pointer;flex:none}
-.music button#musicNext{background:rgba(255,255,255,.15)}
+.yt{position:fixed;z-index:55;background:rgba(13,43,34,.96);border:2px solid var(--gold);color:#fff;font:800 12px Nunito;box-shadow:0 6px 22px rgba(0,0,0,.45)}
+.yt-bar{display:flex;align-items:center;gap:6px;padding:6px 6px 6px 12px;min-width:0}
+.yt-bar span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.yt-bar button{border:0;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.15);color:#fff;font-size:15px;cursor:pointer;flex:none}
+.yt-bar #ytPlay{background:var(--red)}
+.yt #ytNext,.yt #ytMin{display:none}
+.yt.open #ytNext,.yt.open #ytMin{display:block}
+.yt-video{width:200px;height:200px;background:#000;border-radius:10px;overflow:hidden}
+.yt-video iframe{width:200px;height:200px;display:block}
+.yt:not(.open) .yt-video{position:absolute;left:-9999px;top:0}
+/* computador: cantinho inferior direito */
+@media (min-width:700px){
+  .yt{right:16px;bottom:16px;border-radius:18px;width:250px}
+  .yt.open{padding:10px 10px 0}
+  .yt.open .yt-video{margin:0 auto}
+}
+/* celular: rodapé de ponta a ponta, sem cobrir o conteúdo */
+@media (max-width:699px){
+  .yt{left:0;right:0;bottom:0;border-width:2px 0 0;border-radius:16px 16px 0 0;padding-bottom:env(safe-area-inset-bottom)}
+  .yt.open{display:flex;align-items:flex-end;gap:8px;padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
+  .yt.open .yt-bar{flex:1;flex-direction:column;align-items:stretch;padding:0;gap:8px}
+  .yt.open .yt-bar span{white-space:normal;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;font-size:13px}
+  .yt.open .yt-bar{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:1fr auto;align-self:stretch;padding-top:4px}
+  .yt.open .yt-bar span{grid-column:1/-1;align-self:start}
+  .yt.open .yt-bar button{width:100%;border-radius:12px;height:40px}
+  .wrap{padding-bottom:90px}
+  body.yt-open .wrap{padding-bottom:250px}
+}
 </style>
 </head>
 <body>
@@ -626,61 +650,57 @@ $('soundBtn').textContent = SOUND ? '🔔' : '🔕';
 
 
 /* ================================================================
-   MÚSICAS (caixinha de música sintetizada — melodias de domínio público)
+   MÚSICAS — tocador oficial do YouTube (playlist em loop)
+   Regras do YouTube: área do vídeo >= 200x200 e visível enquanto toca.
    ================================================================ */
-const NOTE = { C:-9, 'C#':-8, D:-7, 'D#':-6, E:-5, F:-4, 'F#':-3, G:-2, 'G#':-1, A:0, 'A#':1, B:2 };
-const freq = n => { const m = n.match(/^([A-G]#?)(\d)$/); return 440 * Math.pow(2, (NOTE[m[1]] + (m[2] - 4) * 12) / 12); };
-const seq = s => s.trim().split(/\s+/).map(t => { const [n, d] = t.split(':'); return [n, parseFloat(d)]; });
-const SONGS = [
-  { nome:'Jingle Bells', bpm:168, up:1, notas: seq(`
-    E4:1 E4:1 E4:2 E4:1 E4:1 E4:2 E4:1 G4:1 C4:1.5 D4:0.5 E4:4
-    F4:1 F4:1 F4:1.5 F4:0.5 F4:1 E4:1 E4:1 E4:0.5 E4:0.5 E4:1 D4:1 D4:1 E4:1 D4:2 G4:2
-    E4:1 E4:1 E4:2 E4:1 E4:1 E4:2 E4:1 G4:1 C4:1.5 D4:0.5 E4:4
-    F4:1 F4:1 F4:1.5 F4:0.5 F4:1 E4:1 E4:1 E4:0.5 E4:0.5 G4:1 G4:1 F4:1 D4:1 C4:4`) },
-  { nome:'We Wish You a Merry Christmas', bpm:150, up:0, notas: seq(`
-    G4:1 C5:1 C5:0.5 D5:0.5 C5:0.5 B4:0.5 A4:1 A4:1 A4:1 D5:1 D5:0.5 E5:0.5 D5:0.5 C5:0.5 B4:1 G4:1 G4:1
-    E5:1 E5:0.5 F5:0.5 E5:0.5 D5:0.5 C5:1 A4:1 G4:0.5 G4:0.5 A4:1 D5:1 B4:1 C5:3
-    G4:1 C5:1 C5:0.5 D5:0.5 C5:0.5 B4:0.5 A4:1 A4:1 A4:1 D5:1 D5:0.5 E5:0.5 D5:0.5 C5:0.5 B4:1 G4:1 G4:1
-    E5:1 E5:0.5 F5:0.5 E5:0.5 D5:0.5 C5:1 A4:1 G4:0.5 G4:0.5 A4:1 D5:1 B4:1 C5:3`) },
-  { nome:'Deck the Halls', bpm:132, up:1, notas: seq(`
-    G4:1.5 F4:0.5 E4:1 D4:1 C4:1 D4:1 E4:1 C4:1 D4:0.5 E4:0.5 F4:0.5 D4:0.5 E4:1.5 D4:0.5 C4:1 B3:1 C4:2
-    G4:1.5 F4:0.5 E4:1 D4:1 C4:1 D4:1 E4:1 C4:1 D4:0.5 E4:0.5 F4:0.5 D4:0.5 E4:1.5 D4:0.5 C4:1 B3:1 C4:2
-    G4:1.5 F4:0.5 E4:1 D4:1 C4:1 D4:1 E4:1 C4:1 A4:0.5 A4:0.5 A4:0.5 A4:0.5 G4:1.5 F4:0.5 E4:1 D4:1 C4:2`) },
-  { nome:'Noite Feliz', bpm:100, up:0, notas: seq(`
-    G4:1.5 A4:0.5 G4:1 E4:3 G4:1.5 A4:0.5 G4:1 E4:3 D5:2 D5:1 B4:3 C5:2 C5:1 G4:3
-    A4:2 A4:1 C5:1.5 B4:0.5 A4:1 G4:1.5 A4:0.5 G4:1 E4:3 A4:2 A4:1 C5:1.5 B4:0.5 A4:1 G4:1.5 A4:0.5 G4:1 E4:3
-    D5:2 D5:1 F5:1.5 D5:0.5 B4:1 C5:3 E5:3 C5:1 G4:1 E4:1 G4:1.5 F4:0.5 D4:1 C4:4`) },
-];
-const Music = { on:false, i:0, timer:null, master:null };
-function boxNote(a, out, f, t, dur){
-  [[1,.22],[2,.07],[4.2,.025]].forEach(([m,v]) => { const o = a.createOscillator(), g = a.createGain();
-    o.type = 'sine'; o.frequency.value = f*m; g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(v,t+.008);
-    g.gain.exponentialRampToValueAtTime(.0001, t + Math.max(.6, dur*1.6)); o.connect(g).connect(out); o.start(t); o.stop(t + Math.max(.6,dur*1.6) + .05); });
+const YT_VIDEOS = ['aAkMkVFwAoo', 'mMo8DvW9DP8'];
+const Music = { player:null, ready:false, playing:false, want:false };
+function ytLoad(){
+  if (window.YT && window.YT.Player) return Promise.resolve();
+  if (ytLoad.p) return ytLoad.p;
+  ytLoad.p = new Promise(res => { const prev = window.onYouTubeIframeAPIReady; window.onYouTubeIframeAPIReady = () => { prev && prev(); res(); };
+    const t = document.createElement('script'); t.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(t); });
+  return ytLoad.p;
 }
-function playSong(){
-  const a = ac(); if (!a || !Music.on) return;
-  if (a.state === 'suspended') a.resume();
-  const s = SONGS[Music.i], beat = 60 / s.bpm, out = Music.master; let t = a.currentTime + .15;
-  s.notas.forEach(([n, d]) => { const m = n.match(/^([A-G]#?)(\d)$/); boxNote(a, out, freq(m[1] + (+m[2] + s.up)), t, d*beat); t += d*beat; });
-  updateMusicUI();
-  Music.timer = setTimeout(() => { Music.i = (Music.i + 1) % SONGS.length; playSong(); }, (t - a.currentTime + 1.6) * 1000);
+function ytUI(){
+  const box = $('yt'); box.classList.toggle('open', Music.playing);
+  $('ytPlay').textContent = Music.playing ? '⏸' : '▶'; $('ytPlay').setAttribute('aria-label', Music.playing ? 'Pausar' : 'Tocar');
+  let t = 'Músicas de Natal'; try { const d = Music.player && Music.player.getVideoData && Music.player.getVideoData(); if (d && d.title && Music.playing) t = d.title; } catch {}
+  $('ytTitle').textContent = (Music.playing ? '♪ ' : '🎵 ') + t;
+  document.body.classList.toggle('yt-open', Music.playing);
 }
-function stopMusic(){ clearTimeout(Music.timer); if (Music.master){ try { Music.master.disconnect(); } catch {} Music.master = null; } }
-function startMusic(){ const a = ac(); if (!a) return; stopMusic(); Music.master = a.createGain(); Music.master.gain.value = .5; Music.master.connect(a.destination); playSong(); }
-function updateMusicUI(){
-  $('musicBtn').textContent = Music.on ? '⏸' : '🎵'; $('musicBtn').setAttribute('aria-label', Music.on ? 'Pausar músicas' : 'Tocar músicas');
-  $('musicName').textContent = Music.on ? '♪ ' + SONGS[Music.i].nome : 'Músicas de Natal';
-  $('musicNext').classList.toggle('hidden', !Music.on);
+async function ytEnsure(){
+  if (Music.player) return;
+  await ytLoad();
+  await new Promise(res => {
+    Music.player = new YT.Player('ytFrame', {
+      width: 200, height: 200, videoId: YT_VIDEOS[0],
+      playerVars: { playlist: YT_VIDEOS.join(','), loop: 1, playsinline: 1, rel: 0, origin: location.origin },
+      events: {
+        onReady: () => { Music.ready = true; res(); },
+        onStateChange: e => { Music.playing = e.data === YT.PlayerState.PLAYING || e.data === YT.PlayerState.BUFFERING; ytUI(); },
+        onError: () => { try { Music.player.nextVideo(); } catch {} },
+      },
+    });
+  });
 }
-window.toggleMusic = () => { Music.on = !Music.on; try { localStorage.setItem('asMusic', Music.on ? '1' : '0'); } catch {} Music.on ? startMusic() : stopMusic(); updateMusicUI(); };
-window.nextMusic = () => { if (!Music.on) return; Music.i = (Music.i + 1) % SONGS.length; startMusic(); };
-(function initMusic(){
-  const box = document.createElement('div'); box.className = 'music';
-  box.innerHTML = `<span id="musicName">Músicas de Natal</span><button id="musicNext" class="hidden" onclick="window.nextMusic()" aria-label="Próxima música">⏭</button><button id="musicBtn" onclick="window.toggleMusic()" aria-label="Tocar músicas">🎵</button>`;
+window.ytToggle = async () => {
+  try { await ytEnsure(); } catch(e){ console.error(e); return; }
+  if (Music.playing){ Music.player.pauseVideo(); Music.want = false; } else { Music.player.playVideo(); Music.want = true; }
+  try { localStorage.setItem('asMusic', Music.want ? '1' : '0'); } catch {}
+};
+window.ytNext = () => { if (Music.player) Music.player.nextVideo(); };
+window.ytMin = () => { if (Music.player) Music.player.pauseVideo(); Music.want = false; try { localStorage.setItem('asMusic','0'); } catch {} };
+(function initYT(){
+  const box = document.createElement('div'); box.className = 'yt'; box.id = 'yt';
+  box.innerHTML = `<div class="yt-video"><div id="ytFrame"></div></div>
+    <div class="yt-bar"><span id="ytTitle">🎵 Músicas de Natal</span>
+      <button id="ytNext" onclick="window.ytNext()" aria-label="Próxima música">⏭</button>
+      <button id="ytPlay" onclick="window.ytToggle()" aria-label="Tocar">▶</button>
+      <button id="ytMin" onclick="window.ytMin()" aria-label="Minimizar e pausar">–</button></div>`;
   document.body.appendChild(box);
-  let want = false; try { want = localStorage.getItem('asMusic') === '1'; } catch {}
-  // navegadores só liberam som depois de um toque: retoma no primeiro toque se estava ligado
-  if (want){ const go = e => { if (e.target.closest && e.target.closest('.music')) return; removeEventListener('pointerdown', go, true); if (!Music.on){ Music.on = true; startMusic(); updateMusicUI(); } }; addEventListener('pointerdown', go, true); }
+  // já deixa o tocador carregado (sem tocar), para o primeiro toque responder rápido
+  setTimeout(() => ytEnsure().catch(() => {}), 1200);
 })();
 
 /* ================================================================
