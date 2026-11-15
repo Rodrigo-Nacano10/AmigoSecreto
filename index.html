@@ -654,7 +654,7 @@ $('soundBtn').textContent = SOUND ? '🔔' : '🔕';
    Regras do YouTube: área do vídeo >= 200x200 e visível enquanto toca.
    ================================================================ */
 const YT_VIDEOS = ['aAkMkVFwAoo', 'mMo8DvW9DP8'];
-const Music = { player:null, ready:false, playing:false, want:false };
+const Music = { player:null, ready:false, playing:false, want:false, pending:false };
 function ytLoad(){
   if (window.YT && window.YT.Player) return Promise.resolve();
   if (ytLoad.p) return ytLoad.p;
@@ -699,8 +699,20 @@ window.ytMin = () => { if (Music.player) Music.player.pauseVideo(); Music.want =
       <button id="ytPlay" onclick="window.ytToggle()" aria-label="Tocar">▶</button>
       <button id="ytMin" onclick="window.ytMin()" aria-label="Minimizar e pausar">–</button></div>`;
   document.body.appendChild(box);
-  // já deixa o tocador carregado (sem tocar), para o primeiro toque responder rápido
-  setTimeout(() => ytEnsure().catch(() => {}), 1200);
+  // carrega o tocador logo de cara (sem tocar), para o primeiro toque responder na hora
+  ytEnsure().then(() => { if (Music.pending){ Music.pending = false; Music.player.playVideo(); } }).catch(() => {});
+  // os navegadores só liberam som depois de uma interação: a música começa no 1º toque/clique/tecla
+  // em qualquer lugar da página — a não ser que a pessoa tenha minimizado o tocador antes (fica lembrado)
+  let off = false; try { off = localStorage.getItem('asMusic') === '0'; } catch {}
+  if (!off){
+    const go = e => {
+      if (e.target.closest && e.target.closest('#yt')) { stop(); return; } // clique no próprio tocador: ele mesmo resolve
+      stop(); Music.want = true;
+      if (Music.ready) Music.player.playVideo(); else Music.pending = true;
+    };
+    const stop = () => ['pointerdown','keydown','touchstart'].forEach(t => removeEventListener(t, go, true));
+    ['pointerdown','keydown','touchstart'].forEach(t => addEventListener(t, go, { capture:true, passive:true }));
+  }
 })();
 
 /* ================================================================
